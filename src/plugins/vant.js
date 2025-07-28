@@ -4,27 +4,20 @@ import 'vant/lib/index.css'
 export default {
   install(app) {
     // 全局配置
-    if (Vant.Toast) {
-      Vant.Toast.setDefaultOptions({
-        duration: 2000,
-        position: 'bottom',
-      })
-      app.config.globalProperties.$toast = Vant.Toast
+    // Vant 4 中不再需要手動設置默認選項
+    // 可以直接在調用時傳入選項
+    
+    // 添加全局方法
+    if (Vant.showToast) {
+      app.config.globalProperties.$toast = Vant.showToast
     }
 
-    if (Vant.Dialog) {
-      Vant.Dialog.setDefaultOptions({
-        confirmButtonText: '確定',
-        cancelButtonText: '取消',
-      })
-      app.config.globalProperties.$dialog = Vant.Dialog
+    if (Vant.showConfirmDialog) {
+      app.config.globalProperties.$dialog = Vant.showConfirmDialog
     }
 
-    if (Vant.Notify) {
-      Vant.Notify.setDefaultOptions({
-        duration: 2000,
-      })
-      app.config.globalProperties.$notify = Vant.Notify
+    if (Vant.showNotify) {
+      app.config.globalProperties.$notify = Vant.showNotify
     }
 
     if (Vant.ImagePreview) {
