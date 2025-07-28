@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { Toast } from 'vant'
-import { useUserStore } from '@/store/user'
+import { userStore } from '@/store/user'
 import router from '@/router'
 
 // 創建 axios 實例
@@ -17,11 +17,11 @@ const service = axios.create({
 service.interceptors.request.use(
   (config) => {
     // 在發送請求之前做些什麼
-    const userStore = useUserStore()
+    // 直接使用導入的 userStore
     
     // 如果 token 存在，則在請求頭中添加 token
-    if (userStore.token) {
-      config.headers['Authorization'] = `Bearer ${userStore.token}`
+    if (userStore.userInfo?.token) {
+      config.headers['Authorization'] = `Bearer ${userStore.userInfo.token}`
     }
     
     // 添加時間戳，防止緩存
@@ -72,7 +72,7 @@ service.interceptors.response.use(
       
       // 未登錄或 token 過期
       if (res.code === 401) {
-        const userStore = useUserStore()
+        // 直接使用導入的 userStore
         userStore.logout()
         
         // 跳轉到登錄頁
@@ -102,7 +102,7 @@ service.interceptors.response.use(
         case 401:
           message = '未授權，請重新登錄'
           // 清除 token 並跳轉到登錄頁
-          const userStore = useUserStore()
+          // 直接使用導入的 userStore
           userStore.logout()
           
           router.push({
