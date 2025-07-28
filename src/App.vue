@@ -1,146 +1,105 @@
 <template>
-  <div class="app-container">
-    <div :style="themeVars">
-      <router-view v-slot="{ Component: RouteComponent }">
-        <keep-alive :include="cachedViews">
-          <component :is="RouteComponent" v-if="RouteComponent" />
-        </keep-alive>
-      </router-view>
-      
-      <!-- 全局 loading -->
-      <van-loading v-if="loadingStore.loading" class="global-loading" />
-      
-      <!-- 全局 toast -->
-      <van-toast />
-      
-      <!-- 全局 dialog -->
-      <van-dialog />
-      
-      <van-tabbar v-model="activeTab" route>
-        <van-tabbar-item to="/home">
-          <template #icon><Icon icon="mdi:home" /></template>
-          首頁
-        </van-tabbar-item>
-        <van-tabbar-item to="/about">
-          <template #icon><Icon icon="mdi:information" /></template>
-          關於
-        </van-tabbar-item>
-      </van-tabbar>
-    </div>
+  <div class="app">
+    <!-- 頁面內容 -->
+    <router-view v-slot="{ Component }">
+      <keep-alive :include="cachedViews">
+        <component :is="Component" />
+      </keep-alive>
+    </router-view>
+
+    <!-- 底部導航 -->
+    <van-tabbar route v-if="showTabbar">
+      <van-tabbar-item to="/home" icon="home-o">首頁</van-tabbar-item>
+      <van-tabbar-item to="/about" icon="user-o">關於</van-tabbar-item>
+    </van-tabbar>
+    
+    <!-- 全局組件 -->
+    <van-toast />
+    <van-dialog />
   </div>
 </template>
 
-<script>
-import { ref, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
-import { Icon } from '@iconify/vue';
-import { useLoadingStore } from './store/loading.js';
-import 'vant/es/toast/style';
-import 'vant/es/dialog/style';
+<script setup>
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
 
-export default {
-  name: 'App',
-  components: { 
-    Icon
-  },
-  
-  setup() {
-    // 定義主題變量
-    const themeVars = {
-      // 主色
-      '--van-primary-color': '#1989fa',
-      '--van-success-color': '#07c160',
-      '--van-warning-color': '#ff976a',
-      '--van-danger-color': '#ee0a24',
-      // 文字
-      '--van-text-color': '#323233',
-      '--van-text-color-2': '#969799',
-      '--van-text-color-3': '#c8c9cc',
-      // 背景
-      '--van-background-color': '#f7f8fa',
-      // 間距
-      '--van-padding-sm': '8px',
-      '--van-padding-md': '12px',
-      '--van-padding-lg': '16px',
-      // 圓角
-      '--van-border-radius-sm': '2px',
-      '--van-border-radius-md': '4px',
-      '--van-border-radius-lg': '8px',
-      '--van-border-radius-max': '999px'
-    };
-    
-    const activeTab = ref(0);
-    const cachedViews = ref([]);
-    
-    // 獲取 loading store 和 route
-    const loadingStore = useLoadingStore();
-    const route = useRoute();
+const route = useRoute()
 
-    // 根據當前路由更新激活的標籤
-    const updateActiveTab = () => {
-      const path = route.path;
-      if (path.includes('/home')) activeTab.value = 0;
-      else if (path.includes('/about')) activeTab.value = 1;
-    };
+// 需要緩存的組件
+const cachedViews = ref(['Home', 'About'])
 
-    // 監聽路由變化
-    watch(() => route.path, updateActiveTab);
-
-    // 初始化時更新激活的標籤
-    onMounted(updateActiveTab);
-
-    return {
-      themeVars,
-      activeTab,
-      cachedViews,
-      loadingStore
-    };
-  }
-};
+// 是否顯示底部導航
+const showTabbar = computed(() => {
+  return ['/home', '/about'].includes(route.path)
+})
 </script>
 
-<style lang="scss" scoped>
-.app-container {
-  width: 100%;
-  min-height: 100vh;
-  background-color: var(--background-color);
-  color: var(--text-color);
-  font-size: var(--font-size-md);
+<style>
+/* 全局樣式 */
+:root {
+  --primary-color: #1989fa;
+  --success-color: #07c160;
+  --warning-color: #ff976a;
+  --danger-color: #ee0a24;
+  --text-color: #323233;
+  --text-secondary: #969799;
+  --border-color: #ebedf0;
+  --background-color: #f7f8fa;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
   line-height: 1.5;
+  color: var(--text-color);
+  background-color: var(--background-color);
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-// 全局 loading 樣式
-:deep(.van-loading) {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 2000;
+/* 修復 Vant 標籤欄遮擋內容的問題 */
+body {
+  padding-bottom: 50px;
 }
 
-// 響應式調整
-@media (max-width: 768px) {
-  .app-container {
-    padding-bottom: 50px; // 為底部導航欄留出空間
-  }
-}
-
-.global-loading {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 9999;
-}
-
-.test-box {
-  padding: 20px;
-  margin: 20px;
-  background-color: #007bff;
-  color: white;
+/* 全局工具類 */
+.text-center {
   text-align: center;
-  border-radius: 8px;
+}
+
+.mt-10 {
+  margin-top: 10px;
+}
+
+.mb-10 {
+  margin-bottom: 10px;
+}
+
+.p-10 {
+  padding: 10px;
+}
+
+/* 修復圖片默認樣式 */
+img {
+  max-width: 100%;
+  height: auto;
+  vertical-align: middle;
+}
+
+/* 修復表單元素 */
+input, button, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* 修復 iOS 按鈕點擊高亮 */
+a, button, input, textarea {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 </style>
