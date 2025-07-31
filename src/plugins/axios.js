@@ -16,8 +16,12 @@ const service = axios.create({
 // 請求攔截器
 service.interceptors.request.use(
   (config) => {
-    // 在發送請求之前做些什麼
-    // 直接使用導入的 userStore
+    console.log('[Axios] 請求發起:', {
+      url: config.url,
+      method: config.method,
+      baseURL: config.baseURL,
+      hasToken: !!userStore.userInfo?.token
+    })
     
     // 如果 token 存在，則在請求頭中添加 token
     if (userStore.userInfo?.token) {
@@ -56,12 +60,24 @@ service.interceptors.response.use(
     // 隱藏 loading
     Toast.clear()
     
+    console.log('[Axios] 請求成功:', {
+      url: response.config.url,
+      status: response.status,
+      data: response.data
+    })
+    
     const res = response.data
     
     // 這裡根據後端返回的狀態碼進行判斷
     if (res.code === 200) {
       return res.data
     } else {
+      console.warn('[Axios] 請求異常:', {
+        url: response.config.url,
+        code: res.code,
+        message: res.message
+      })
+      
       // 彈出錯誤提示
       if (res.message) {
         Toast({
@@ -88,6 +104,13 @@ service.interceptors.response.use(
   (error) => {
     // 隱藏 loading
     Toast.clear()
+    
+    console.error('[Axios] 請求錯誤:', {
+      url: error.config?.url,
+      method: error.config?.method,
+      status: error.response?.status,
+      message: error.message
+    })
     
     let message = error.message
     

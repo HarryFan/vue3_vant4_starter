@@ -1,4 +1,4 @@
-import request from '@/utils/request'
+import request from '@/plugins/axios'
 
 // 用戶相關 API
 export const userApi = {

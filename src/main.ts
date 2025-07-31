@@ -2,10 +2,10 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
+import vant from 'vant'
+import 'vant/lib/index.css'
 
-// 導入插件
-import vant from './plugins/vant'
-import axios from './plugins/axios'
+// 導入指令
 import directives from './directives'
 
 // 導入全局樣式
@@ -23,23 +23,22 @@ app.use(router)
 
 // 使用插件
 app.use(vant)
-app.use(axios)
 app.use(directives)
 
 // 全局錯誤處理
-app.config.errorHandler = (err, vm, info) => {
+app.config.errorHandler = (err: unknown, vm, info) => {
   console.error('Global error:', err)
   console.error('Error in component:', vm)
   console.error('Error info:', info)
   
-  // 調用統一的錯誤提示組件
-  import('vant').then(({ Toast }) => {
-    Toast({
-      type: 'fail',
-      message: '發生錯誤，請稍後再試',
-      position: 'bottom',
-    })
-  })
+  // 顯示錯誤提示
+  const message = err instanceof Error ? err.message : '未知錯誤'
+  console.error('錯誤訊息:', message)
+  
+  // 可以根據錯誤類型進行不同的處理
+  if (err instanceof Error) {
+    // 處理錯誤
+  }
 }
 
 // 全局屬性
